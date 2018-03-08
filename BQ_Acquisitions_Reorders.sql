@@ -1,8 +1,8 @@
 SELECT
 	geelbe.orders.id AS 'Orden',
 	CAST(geelbe.orders.created AS DATE) AS 'FechaOrden',
-	YEAR(geelbe.orders.created) AS 'MesOrden',
-	MONTHNAME(geelbe.orders.created) AS 'AnioOrden',
+	YEAR(geelbe.orders.created) AS 'AnioOrden',
+	MONTHNAME(geelbe.orders.created) AS 'MesOrden',
 	users.email AS 'Email',
 	geelbe.orders.statusId AS 'Status',
 	geelbe.orders.created,
