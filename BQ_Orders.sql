@@ -1,17 +1,29 @@
+DROP TABLE BQ_Orders;
+
+CREATE TABLE BQ_Orders
 SELECT
-   	CAST(geelbe.orders.created AS DATE) AS 'Fecha_orden',
-   	geelbe.orders.id AS 'ID_Orden',
-    geelbe.users.email AS 'email',
-   	geelbe.orders.statusId AS 'StatusID',
-   	geelbe.orders_status.name AS 'Status',    
-   	geelbe.orders.subtotal AS 'Subtotal',
-   	geelbe.orders.tax AS 'Tax',
+   	CAST(geelbe.orders.created AS DATE) AS 'FechaOrden',
+   	geelbe.orders.id AS 'IdOrden',
+    geelbe.users.email AS 'Email',
+   	geelbe.orders_status.name AS 'StatusOrden',
+CASE
+	WHEN (geelbe.orders_status.id = 2 OR
+		  geelbe.orders_status.id = 4 OR
+		  geelbe.orders_status.id = 5 OR
+		  geelbe.orders_status.id = 6 OR
+		  geelbe.orders_status.id = 10 OR
+		  geelbe.orders_status.id = 11 OR
+		  geelbe.orders_status.id = 12) THEN 'Aceptada'
+	ELSE 'Rechazada'
+END AS 'StatusAgrupado',
+   	geelbe.orders.tax AS 'IVA',
+   	geelbe.orders.subtotal AS 'Subtotal_IVA',
+    ROUND((geelbe.orders.subtotal / ((geelbe.orders.tax + 100) / 100)),1) AS 'Subtotal_SinIVA',    
    	geelbe.orders.discount 'Descuento',
    	geelbe.orders.credits AS 'Creditos',
-   	geelbe.orders.shipping AS 'Costo_envio',
+   	geelbe.orders.shipping AS 'CostoEnvio',
    	geelbe.orders.total AS 'Total',
-   	(geelbe.orders.subtotal-geelbe.orders.tax) AS 'Subtotal_SinIVA',
-   	geelbe.payment_methods.name AS 'Metodo_pago',
+   	geelbe.payment_methods.name AS 'MetodoPago',
    	geelbe.users.sex AS 'Genero',
 	geelbe.orders.sourceId,
 CASE
@@ -20,7 +32,7 @@ CASE
 	WHEN geelbe.orders.sourceId = 3 THEN 'POS' 
 	WHEN geelbe.orders.sourceId = 5 THEN 'Tienda asociada' 
 	WHEN geelbe.orders.sourceId = 6 THEN 'Movil Web'
-END AS 'Source_name',
+END AS 'FuenteOriginal',
 
 CASE
 	WHEN geelbe.orders.referer LIKE '%App Android%' THEN 'App Android'
@@ -45,13 +57,6 @@ LEFT JOIN geelbe.sources
 ON (geelbe.sources.id = geelbe.orders.sourceId)
 
 WHERE
-	(geelbe.orders.created > '2010-01-01 00:00:00') AND
-	(geelbe.orders.statusId = 2 OR
-	 geelbe.orders.statusId = 4 OR
-	 geelbe.orders.statusId = 5 OR
-	 geelbe.orders.statusId = 6 OR
-	 geelbe.orders.statusId = 10 OR
-	 geelbe.orders.statusId = 12 OR
-	 geelbe.orders.statusId = 11)
+	(geelbe.orders.created > '2010-01-01 00:00:00')
 
 ORDER BY geelbe.orders.created;

@@ -1,3 +1,4 @@
+
 SELECT
 	geelbe.orders.id AS 'Orden',
 	CAST(geelbe.orders.created AS DATE) AS 'FechaOrden',
@@ -13,7 +14,7 @@ SELECT
 		WHEN (geelbe.orders.created) - (FechaPrimerPedido) = '0' THEN 'Adquisicion'
 		ELSE 'Recompra'
 	END AS 'TipoOrden',
-        
+    
 	CASE
 		WHEN geelbe.orders.sourceId = 1 THEN 'Web' 
 		WHEN geelbe.orders.sourceId = 2 THEN 'Movil App' 
