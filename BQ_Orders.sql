@@ -2,61 +2,61 @@ DROP TABLE BQ_Orders;
 
 CREATE TABLE BQ_Orders
 SELECT
-   	CAST(geelbe.orders.created AS DATE) AS 'FechaOrden',
-   	geelbe.orders.id AS 'IdOrden',
-    geelbe.users.email AS 'Email',
-   	geelbe.orders_status.name AS 'StatusOrden',
+   	CAST(orders.created AS DATE) AS 'FechaOrden',
+   	orders.id AS 'IdOrden',
+    users.email AS 'Email',
+   	orders_status.name AS 'StatusOrden',
 CASE
-	WHEN (geelbe.orders_status.id = 2 OR
-		  geelbe.orders_status.id = 4 OR
-		  geelbe.orders_status.id = 5 OR
-		  geelbe.orders_status.id = 6 OR
-		  geelbe.orders_status.id = 10 OR
-		  geelbe.orders_status.id = 11 OR
-		  geelbe.orders_status.id = 12) THEN 'Aceptada'
+	WHEN (orders_status.id = 2 OR
+		  orders_status.id = 4 OR
+		  orders_status.id = 5 OR
+		  orders_status.id = 6 OR
+		  orders_status.id = 10 OR
+		  orders_status.id = 11 OR
+		  orders_status.id = 12) THEN 'Aceptada'
 	ELSE 'Rechazada'
 END AS 'StatusAgrupado',
-   	geelbe.orders.tax AS 'IVA',
-   	geelbe.orders.subtotal AS 'Subtotal_IVA',
-    ROUND((geelbe.orders.subtotal / ((geelbe.orders.tax + 100) / 100)),1) AS 'Subtotal_SinIVA',    
-   	geelbe.orders.discount 'Descuento',
-   	geelbe.orders.credits AS 'Creditos',
-   	geelbe.orders.shipping AS 'CostoEnvio',
-   	geelbe.orders.total AS 'Total',
-   	geelbe.payment_methods.name AS 'MetodoPago',
-   	geelbe.users.sex AS 'Genero',
-	geelbe.orders.sourceId,
+   	orders.tax AS 'IVA',
+   	orders.subtotal AS 'Subtotal_IVA',
+    ROUND((orders.subtotal - orders.tax),1) AS 'Subtotal_SinIVA',    
+   	orders.discount 'Descuento',
+   	orders.credits AS 'Creditos',
+   	orders.shipping AS 'CostoEnvio',
+   	orders.total AS 'Total',
+   	payment_methods.name AS 'MetodoPago',
+   	users.sex AS 'Genero',
+	orders.sourceId,
 CASE
-	WHEN geelbe.orders.sourceId = 1 THEN 'Web' 
-	WHEN geelbe.orders.sourceId = 2 THEN 'Movil App' 
-	WHEN geelbe.orders.sourceId = 3 THEN 'POS' 
-	WHEN geelbe.orders.sourceId = 5 THEN 'Tienda asociada' 
-	WHEN geelbe.orders.sourceId = 6 THEN 'Movil Web'
+	WHEN orders.sourceId = 1 THEN 'Web' 
+	WHEN orders.sourceId = 2 THEN 'Movil App' 
+	WHEN orders.sourceId = 3 THEN 'POS' 
+	WHEN orders.sourceId = 5 THEN 'Tienda asociada' 
+	WHEN orders.sourceId = 6 THEN 'Movil Web'
 END AS 'FuenteOriginal',
 
 CASE
-	WHEN geelbe.orders.referer LIKE '%App Android%' THEN 'App Android'
-	WHEN geelbe.orders.referer LIKE '%App iOS%' THEN 'App iOS'
-	WHEN (geelbe.orders.referer IS NULL AND geelbe.orders.sourceId = 1) THEN 'Web'    
-	WHEN (geelbe.orders.referer IS NULL AND geelbe.orders.sourceId = 2) THEN 'Movil Web'
-    WHEN (geelbe.orders.referer IS NULL AND geelbe.orders.sourceId = 6) THEN 'Movil Web'
+	WHEN orders.referer LIKE '%App Android%' THEN 'App Android'
+	WHEN orders.referer LIKE '%App iOS%' THEN 'App iOS'
+	WHEN (orders.referer IS NULL AND orders.sourceId = 1) THEN 'Web'    
+	WHEN (orders.referer IS NULL AND orders.sourceId = 2) THEN 'Movil Web'
+    WHEN (orders.referer IS NULL AND orders.sourceId = 6) THEN 'Movil Web'
 END AS 'FuenteFinal'
 
-FROM geelbe.orders
+FROM orders
 
-LEFT JOIN geelbe.users 
-ON (geelbe.users.id = geelbe.orders.userid) 
+LEFT JOIN users 
+ON (users.id = orders.userid) 
 
-LEFT JOIN geelbe.orders_status
-ON (geelbe.orders.statusId = geelbe.orders_status.id) 
+LEFT JOIN orders_status
+ON (orders.statusId = orders_status.id) 
 
-LEFT JOIN geelbe.payment_methods
-ON (geelbe.payment_methods.id = geelbe.orders.paymentMethodId)
+LEFT JOIN payment_methods
+ON (payment_methods.id = orders.paymentMethodId)
 
-LEFT JOIN geelbe.sources
-ON (geelbe.sources.id = geelbe.orders.sourceId)
+LEFT JOIN sources
+ON (sources.id = orders.sourceId)
 
 WHERE
-	(geelbe.orders.created > '2010-01-01 00:00:00')
+	(orders.created > '2010-01-01 00:00:00')
 
-ORDER BY geelbe.orders.created;
+ORDER BY orders.created;

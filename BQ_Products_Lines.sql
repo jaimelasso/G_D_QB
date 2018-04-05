@@ -2,25 +2,34 @@ DROP TABLE BQ_ProductsLines;
 
 CREATE TABLE BQ_ProductsLines
 SELECT
-    CAST(geelbe.orders.created AS DATE) AS 'FechaOrden',
-    geelbe.orders.id AS 'IdOrden',
-    geelbe.orders_products.productId AS 'IdProducto',
-    geelbe.products.name AS 'Producto',
-    geelbe.orders_products.quantity AS 'Cantidad',
-    geelbe.orders_products.price AS 'PrecioVenta',
-    geelbe.products.tax AS 'IVA',
-    geelbe.orders_products.total AS 'Subtotal_IVA',
-    ROUND((geelbe.orders_products.total / ((geelbe.products.tax + 100) / 100)),1) AS 'Subtotal_SinIVA',
-    geelbe.products.wholePrice AS 'CostoVenta',
-    ((geelbe.orders_products.quantity) * (geelbe.products.wholePrice)) AS 'TotalCosto',
-    geelbe.products.originalPrice AS 'PrecioMercado',
+    CAST(orders.created AS DATE) AS 'FechaOrden',
+    orders.id AS 'IdOrden',
+    orders_products.productId AS 'IdProducto',
+    products.name AS 'Producto',
+    orders_products.quantity AS 'Cantidad',
+    orders_products.price AS 'PrecioVenta',
+    products.tax AS 'IVA',
+    orders_products.total AS 'Subtotal_IVA',
     
     CASE
-		WHEN (geelbe.orders_products.total = 0) THEN 0
-        ELSE ((geelbe.orders_products.price - geelbe.products.wholePrice) * geelbe.orders_products.quantity)
-    END AS 'Contribucion',
+		WHEN (products.tax IS NULL) THEN orders_products.total
+        ELSE ROUND((orders_products.total / ((products.tax + 100) / 100)),1)
+	END AS 'Subtotal_SinIVA',
+    products.wholePrice AS 'CostoVenta',
+    ((orders_products.quantity) * (products.wholePrice)) AS 'TotalCosto',
+    products.originalPrice AS 'PrecioMercado',
+    
+    CASE
+		WHEN (orders_products.total = 0) THEN 0
+        ELSE ((orders_products.price - products.wholePrice) * orders_products.quantity)
+    END AS 'Contribucion_IVA',
 
-    categories.code AS categoriaId,
+    CASE
+		WHEN (orders_products.total = 0) THEN 0
+        ELSE ROUND((((orders_products.price - products.wholePrice) * orders_products.quantity) / ((products.tax + 100) / 100)),1)
+    END AS 'Contribucion_SinIVA',
+
+    MIN(categories.code) AS categoriaId,
     CASE
         WHEN categories.code LIKE '%G01%' THEN 'Hombre'
         WHEN categories.code LIKE '%G02%' THEN 'Mujer'
@@ -168,9 +177,9 @@ SELECT
         WHEN categories.code LIKE '%G03030201%' THEN 'Duros'
         WHEN categories.code LIKE '%G03030202%' THEN 'Duros'
         WHEN categories.code LIKE '%G03030303%' THEN 'Duros'
-        WHEN categories.code LIKE '%G03030401%' THEN 'Complementos Hogar y Juguetería'
-        WHEN categories.code LIKE '%G03030402%' THEN 'Complementos Hogar y Juguetería'
-        WHEN categories.code LIKE '%G03030404%' THEN 'Complementos Hogar y Juguetería'
+        WHEN categories.code LIKE '%G03030401%' THEN 'Comp. Hogar y Jugueteria'
+        WHEN categories.code LIKE '%G03030402%' THEN 'Comp. Hogar y Jugueteria'
+        WHEN categories.code LIKE '%G03030404%' THEN 'Comp. Hogar y Jugueteria'
         WHEN categories.code LIKE '%G03030506%' THEN 'Duros'
         WHEN categories.code LIKE '%G03030507%' THEN 'Duros'
         WHEN categories.code LIKE '%G03030508%' THEN 'Duros'
@@ -179,75 +188,75 @@ SELECT
         WHEN categories.code LIKE '%G03030503%' THEN 'Duros'
         WHEN categories.code LIKE '%G03030504%' THEN 'Blandos'
         WHEN categories.code LIKE '%G03030505%' THEN 'Blandos'
-        WHEN categories.code LIKE '%G03030601%' THEN 'Complementos Hogar y Juguetería'
-        WHEN categories.code LIKE '%G03030602%' THEN 'Complementos Hogar y Juguetería'
-        WHEN categories.code LIKE '%G03030603%' THEN 'Complementos Hogar y Juguetería'
-        WHEN categories.code LIKE '%G03030604%' THEN 'Complementos Hogar y Juguetería'
-        WHEN categories.code LIKE '%G03030605%' THEN 'Complementos Hogar y Juguetería'
-        WHEN categories.code LIKE '%G03030606%' THEN 'Complementos Hogar y Juguetería'
-        WHEN categories.code LIKE '%G04010101%' THEN 'Complementos Hogar y Juguetería'
-        WHEN categories.code LIKE '%G04010102%' THEN 'Complementos Hogar y Juguetería'
-        WHEN categories.code LIKE '%G04010103%' THEN 'Complementos Hogar y Juguetería'
-        WHEN categories.code LIKE '%G04010104%' THEN 'Complementos Hogar y Juguetería'
-        WHEN categories.code LIKE '%G04010201%' THEN 'Complementos Hogar y Juguetería'
-        WHEN categories.code LIKE '%G04010202%' THEN 'Complementos Hogar y Juguetería'
-        WHEN categories.code LIKE '%G04010203%' THEN 'Complementos Hogar y Juguetería'
-        WHEN categories.code LIKE '%G04010204%' THEN 'Complementos Hogar y Juguetería'
-        WHEN categories.code LIKE '%G04010205%' THEN 'Complementos Hogar y Juguetería'
-        WHEN categories.code LIKE '%G04010301%' THEN 'Complementos Hogar y Juguetería'
-        WHEN categories.code LIKE '%G04010302%' THEN 'Complementos Hogar y Juguetería'
-        WHEN categories.code LIKE '%G04010303%' THEN 'Complementos Hogar y Juguetería'
-        WHEN categories.code LIKE '%G04010304%' THEN 'Complementos Hogar y Juguetería'
-        WHEN categories.code LIKE '%G04010305%' THEN 'Complementos Hogar y Juguetería'
-        WHEN categories.code LIKE '%G04010306%' THEN 'Complementos Hogar y Juguetería'
-        WHEN categories.code LIKE '%G04010307%' THEN 'Complementos Hogar y Juguetería'
-        WHEN categories.code LIKE '%G04010401%' THEN 'Complementos Hogar y Juguetería'
-        WHEN categories.code LIKE '%G04010402%' THEN 'Complementos Hogar y Juguetería'
-        WHEN categories.code LIKE '%G04010403%' THEN 'Complementos Hogar y Juguetería'
-        WHEN categories.code LIKE '%G04010404%' THEN 'Complementos Hogar y Juguetería'
-        WHEN categories.code LIKE '%G04010501%' THEN 'Complementos Hogar y Juguetería'
-        WHEN categories.code LIKE '%G04010502%' THEN 'Complementos Hogar y Juguetería'
-        WHEN categories.code LIKE '%G04010503%' THEN 'Complementos Hogar y Juguetería'
-        WHEN categories.code LIKE '%G04010504%' THEN 'Complementos Hogar y Juguetería'
-        WHEN categories.code LIKE '%G04010505%' THEN 'Complementos Hogar y Juguetería'
-        WHEN categories.code LIKE '%G04010601%' THEN 'Complementos Hogar y Juguetería'
-        WHEN categories.code LIKE '%G04010602%' THEN 'Complementos Hogar y Juguetería'
-        WHEN categories.code LIKE '%G04010701%' THEN 'Complementos Hogar y Juguetería'
-        WHEN categories.code LIKE '%G04010702%' THEN 'Complementos Hogar y Juguetería'
-        WHEN categories.code LIKE '%G04020101%' THEN 'Complementos Hogar y Juguetería'
-        WHEN categories.code LIKE '%G04020102%' THEN 'Complementos Hogar y Juguetería'
-        WHEN categories.code LIKE '%G04020103%' THEN 'Complementos Hogar y Juguetería'
-        WHEN categories.code LIKE '%G04020201%' THEN 'Complementos Hogar y Juguetería'
-        WHEN categories.code LIKE '%G04020202%' THEN 'Complementos Hogar y Juguetería'
-        WHEN categories.code LIKE '%G04020203%' THEN 'Complementos Hogar y Juguetería'
-        WHEN categories.code LIKE '%G04020301%' THEN 'Complementos Hogar y Juguetería'
-        WHEN categories.code LIKE '%G04020302%' THEN 'Complementos Hogar y Juguetería'
-        WHEN categories.code LIKE '%G04020303%' THEN 'Complementos Hogar y Juguetería'
-        WHEN categories.code LIKE '%G04020304%' THEN 'Complementos Hogar y Juguetería'
-        WHEN categories.code LIKE '%G04020305%' THEN 'Complementos Hogar y Juguetería'
-        WHEN categories.code LIKE '%G04020306%' THEN 'Complementos Hogar y Juguetería'
-        WHEN categories.code LIKE '%G04020307%' THEN 'Complementos Hogar y Juguetería'
-        WHEN categories.code LIKE '%G04020308%' THEN 'Complementos Hogar y Juguetería'
-        WHEN categories.code LIKE '%G04020309%' THEN 'Complementos Hogar y Juguetería'
-        WHEN categories.code LIKE '%G04020401%' THEN 'Complementos Hogar y Juguetería'
-        WHEN categories.code LIKE '%G04020402%' THEN 'Complementos Hogar y Juguetería'
-        WHEN categories.code LIKE '%G04020403%' THEN 'Complementos Hogar y Juguetería'
-        WHEN categories.code LIKE '%G04020501%' THEN 'Complementos Hogar y Juguetería'
-        WHEN categories.code LIKE '%G04020502%' THEN 'Complementos Hogar y Juguetería'
-        WHEN categories.code LIKE '%G04020503%' THEN 'Complementos Hogar y Juguetería'
-        WHEN categories.code LIKE '%G04020601%' THEN 'Complementos Hogar y Juguetería'
-        WHEN categories.code LIKE '%G04020602%' THEN 'Complementos Hogar y Juguetería'
-        WHEN categories.code LIKE '%G04020603%' THEN 'Complementos Hogar y Juguetería'
-        WHEN categories.code LIKE '%G04020604%' THEN 'Complementos Hogar y Juguetería'
-        WHEN categories.code LIKE '%G04020605%' THEN 'Complementos Hogar y Juguetería'
-        WHEN categories.code LIKE '%G04020606%' THEN 'Complementos Hogar y Juguetería'
-        WHEN categories.code LIKE '%G04030101%' THEN 'Complementos Hogar y Juguetería'
-        WHEN categories.code LIKE '%G04030201%' THEN 'Complementos Hogar y Juguetería'
-        WHEN categories.code LIKE '%G04030202%' THEN 'Complementos Hogar y Juguetería'
-        WHEN categories.code LIKE '%G04030203%' THEN 'Complementos Hogar y Juguetería'
-        WHEN categories.code LIKE '%G04030204%' THEN 'Complementos Hogar y Juguetería'
-        WHEN categories.code LIKE '%G04030205%' THEN 'Complementos Hogar y Juguetería'
-        WHEN categories.code LIKE '%G04030206%' THEN 'Complementos Hogar y Juguetería'
+        WHEN categories.code LIKE '%G03030601%' THEN 'Comp. Hogar y Jugueteria'
+        WHEN categories.code LIKE '%G03030602%' THEN 'Comp. Hogar y Jugueteria'
+        WHEN categories.code LIKE '%G03030603%' THEN 'Comp. Hogar y Jugueteria'
+        WHEN categories.code LIKE '%G03030604%' THEN 'Comp. Hogar y Jugueteria'
+        WHEN categories.code LIKE '%G03030605%' THEN 'Comp. Hogar y Jugueteria'
+        WHEN categories.code LIKE '%G03030606%' THEN 'Comp. Hogar y Jugueteria'
+        WHEN categories.code LIKE '%G04010101%' THEN 'Comp. Hogar y Jugueteria'
+        WHEN categories.code LIKE '%G04010102%' THEN 'Comp. Hogar y Jugueteria'
+        WHEN categories.code LIKE '%G04010103%' THEN 'Comp. Hogar y Jugueteria'
+        WHEN categories.code LIKE '%G04010104%' THEN 'Comp. Hogar y Jugueteria'
+        WHEN categories.code LIKE '%G04010201%' THEN 'Comp. Hogar y Jugueteria'
+        WHEN categories.code LIKE '%G04010202%' THEN 'Comp. Hogar y Jugueteria'
+        WHEN categories.code LIKE '%G04010203%' THEN 'Comp. Hogar y Jugueteria'
+        WHEN categories.code LIKE '%G04010204%' THEN 'Comp. Hogar y Jugueteria'
+        WHEN categories.code LIKE '%G04010205%' THEN 'Comp. Hogar y Jugueteria'
+        WHEN categories.code LIKE '%G04010301%' THEN 'Comp. Hogar y Jugueteria'
+        WHEN categories.code LIKE '%G04010302%' THEN 'Comp. Hogar y Jugueteria'
+        WHEN categories.code LIKE '%G04010303%' THEN 'Comp. Hogar y Jugueteria'
+        WHEN categories.code LIKE '%G04010304%' THEN 'Comp. Hogar y Jugueteria'
+        WHEN categories.code LIKE '%G04010305%' THEN 'Comp. Hogar y Jugueteria'
+        WHEN categories.code LIKE '%G04010306%' THEN 'Comp. Hogar y Jugueteria'
+        WHEN categories.code LIKE '%G04010307%' THEN 'Comp. Hogar y Jugueteria'
+        WHEN categories.code LIKE '%G04010401%' THEN 'Comp. Hogar y Jugueteria'
+        WHEN categories.code LIKE '%G04010402%' THEN 'Comp. Hogar y Jugueteria'
+        WHEN categories.code LIKE '%G04010403%' THEN 'Comp. Hogar y Jugueteria'
+        WHEN categories.code LIKE '%G04010404%' THEN 'Comp. Hogar y Jugueteria'
+        WHEN categories.code LIKE '%G04010501%' THEN 'Comp. Hogar y Jugueteria'
+        WHEN categories.code LIKE '%G04010502%' THEN 'Comp. Hogar y Jugueteria'
+        WHEN categories.code LIKE '%G04010503%' THEN 'Comp. Hogar y Jugueteria'
+        WHEN categories.code LIKE '%G04010504%' THEN 'Comp. Hogar y Jugueteria'
+        WHEN categories.code LIKE '%G04010505%' THEN 'Comp. Hogar y Jugueteria'
+        WHEN categories.code LIKE '%G04010601%' THEN 'Comp. Hogar y Jugueteria'
+        WHEN categories.code LIKE '%G04010602%' THEN 'Comp. Hogar y Jugueteria'
+        WHEN categories.code LIKE '%G04010701%' THEN 'Comp. Hogar y Jugueteria'
+        WHEN categories.code LIKE '%G04010702%' THEN 'Comp. Hogar y Jugueteria'
+        WHEN categories.code LIKE '%G04020101%' THEN 'Comp. Hogar y Jugueteria'
+        WHEN categories.code LIKE '%G04020102%' THEN 'Comp. Hogar y Jugueteria'
+        WHEN categories.code LIKE '%G04020103%' THEN 'Comp. Hogar y Jugueteria'
+        WHEN categories.code LIKE '%G04020201%' THEN 'Comp. Hogar y Jugueteria'
+        WHEN categories.code LIKE '%G04020202%' THEN 'Comp. Hogar y Jugueteria'
+        WHEN categories.code LIKE '%G04020203%' THEN 'Comp. Hogar y Jugueteria'
+        WHEN categories.code LIKE '%G04020301%' THEN 'Comp. Hogar y Jugueteria'
+        WHEN categories.code LIKE '%G04020302%' THEN 'Comp. Hogar y Jugueteria'
+        WHEN categories.code LIKE '%G04020303%' THEN 'Comp. Hogar y Jugueteria'
+        WHEN categories.code LIKE '%G04020304%' THEN 'Comp. Hogar y Jugueteria'
+        WHEN categories.code LIKE '%G04020305%' THEN 'Comp. Hogar y Jugueteria'
+        WHEN categories.code LIKE '%G04020306%' THEN 'Comp. Hogar y Jugueteria'
+        WHEN categories.code LIKE '%G04020307%' THEN 'Comp. Hogar y Jugueteria'
+        WHEN categories.code LIKE '%G04020308%' THEN 'Comp. Hogar y Jugueteria'
+        WHEN categories.code LIKE '%G04020309%' THEN 'Comp. Hogar y Jugueteria'
+        WHEN categories.code LIKE '%G04020401%' THEN 'Comp. Hogar y Jugueteria'
+        WHEN categories.code LIKE '%G04020402%' THEN 'Comp. Hogar y Jugueteria'
+        WHEN categories.code LIKE '%G04020403%' THEN 'Comp. Hogar y Jugueteria'
+        WHEN categories.code LIKE '%G04020501%' THEN 'Comp. Hogar y Jugueteria'
+        WHEN categories.code LIKE '%G04020502%' THEN 'Comp. Hogar y Jugueteria'
+        WHEN categories.code LIKE '%G04020503%' THEN 'Comp. Hogar y Jugueteria'
+        WHEN categories.code LIKE '%G04020601%' THEN 'Comp. Hogar y Jugueteria'
+        WHEN categories.code LIKE '%G04020602%' THEN 'Comp. Hogar y Jugueteria'
+        WHEN categories.code LIKE '%G04020603%' THEN 'Comp. Hogar y Jugueteria'
+        WHEN categories.code LIKE '%G04020604%' THEN 'Comp. Hogar y Jugueteria'
+        WHEN categories.code LIKE '%G04020605%' THEN 'Comp. Hogar y Jugueteria'
+        WHEN categories.code LIKE '%G04020606%' THEN 'Comp. Hogar y Jugueteria'
+        WHEN categories.code LIKE '%G04030101%' THEN 'Comp. Hogar y Jugueteria'
+        WHEN categories.code LIKE '%G04030201%' THEN 'Comp. Hogar y Jugueteria'
+        WHEN categories.code LIKE '%G04030202%' THEN 'Comp. Hogar y Jugueteria'
+        WHEN categories.code LIKE '%G04030203%' THEN 'Comp. Hogar y Jugueteria'
+        WHEN categories.code LIKE '%G04030204%' THEN 'Comp. Hogar y Jugueteria'
+        WHEN categories.code LIKE '%G04030205%' THEN 'Comp. Hogar y Jugueteria'
+        WHEN categories.code LIKE '%G04030206%' THEN 'Comp. Hogar y Jugueteria'
         WHEN categories.code LIKE '%G04040101%' THEN 'Textil hogar, muebles y deco'
         WHEN categories.code LIKE '%G04040102%' THEN 'Textil hogar, muebles y deco'
         WHEN categories.code LIKE '%G04040103%' THEN 'Textil hogar, muebles y deco'
@@ -281,41 +290,41 @@ SELECT
         WHEN categories.code LIKE '%G04060401%' THEN 'Textil hogar, muebles y deco'
         WHEN categories.code LIKE '%G04060402%' THEN 'Textil hogar, muebles y deco'
         WHEN categories.code LIKE '%G04060403%' THEN 'Textil hogar, muebles y deco'
-        WHEN categories.code LIKE '%G04070101%' THEN 'Complementos Hogar y Juguetería'
-        WHEN categories.code LIKE '%G04070102%' THEN 'Complementos Hogar y Juguetería'
-        WHEN categories.code LIKE '%G04070103%' THEN 'Complementos Hogar y Juguetería'
-        WHEN categories.code LIKE '%G04070104%' THEN 'Complementos Hogar y Juguetería'
+        WHEN categories.code LIKE '%G04070101%' THEN 'Comp. Hogar y Jugueteria'
+        WHEN categories.code LIKE '%G04070102%' THEN 'Comp. Hogar y Jugueteria'
+        WHEN categories.code LIKE '%G04070103%' THEN 'Comp. Hogar y Jugueteria'
+        WHEN categories.code LIKE '%G04070104%' THEN 'Comp. Hogar y Jugueteria'
         WHEN categories.code LIKE '%G04080101%' THEN 'Textil hogar, muebles y deco'
         WHEN categories.code LIKE '%G04080102%' THEN 'Textil hogar, muebles y deco'
         WHEN categories.code LIKE '%G04080103%' THEN 'Textil hogar, muebles y deco'
         WHEN categories.code LIKE '%G04080201%' THEN 'Duros'
         WHEN categories.code LIKE '%G04080202%' THEN 'Duros'
-        WHEN categories.code LIKE '%G04080301%' THEN 'Complementos Hogar y Juguetería'
-        WHEN categories.code LIKE '%G04080302%' THEN 'Complementos Hogar y Juguetería'
-        WHEN categories.code LIKE '%G04090101%' THEN 'Complementos Hogar y Juguetería'
-        WHEN categories.code LIKE '%G04090102%' THEN 'Complementos Hogar y Juguetería'
-        WHEN categories.code LIKE '%G04090103%' THEN 'Complementos Hogar y Juguetería'
-        WHEN categories.code LIKE '%G04090104%' THEN 'Complementos Hogar y Juguetería'
-        WHEN categories.code LIKE '%G04100101%' THEN 'Complementos Hogar y Juguetería'
-        WHEN categories.code LIKE '%G04100102%' THEN 'Complementos Hogar y Juguetería'
-        WHEN categories.code LIKE '%G04100103%' THEN 'Complementos Hogar y Juguetería'
-        WHEN categories.code LIKE '%G04100104%' THEN 'Complementos Hogar y Juguetería'
-        WHEN categories.code LIKE '%G04100105%' THEN 'Complementos Hogar y Juguetería'
-        WHEN categories.code LIKE '%G04100201%' THEN 'Complementos Hogar y Juguetería'
-        WHEN categories.code LIKE '%G04100202%' THEN 'Complementos Hogar y Juguetería'
-        WHEN categories.code LIKE '%G04110101%' THEN 'Complementos Hogar y Juguetería'
-        WHEN categories.code LIKE '%G04110102%' THEN 'Complementos Hogar y Juguetería'
-        WHEN categories.code LIKE '%G04110103%' THEN 'Complementos Hogar y Juguetería'
-        WHEN categories.code LIKE '%G04110104%' THEN 'Complementos Hogar y Juguetería'
-        WHEN categories.code LIKE '%G04110201%' THEN 'Complementos Hogar y Juguetería'
-        WHEN categories.code LIKE '%G04110202%' THEN 'Complementos Hogar y Juguetería'
-        WHEN categories.code LIKE '%G04110203%' THEN 'Complementos Hogar y Juguetería'
-        WHEN categories.code LIKE '%G04120101%' THEN 'Complementos Hogar y Juguetería'
-        WHEN categories.code LIKE '%G04120102%' THEN 'Complementos Hogar y Juguetería'
-        WHEN categories.code LIKE '%G04120103%' THEN 'Complementos Hogar y Juguetería'
-        WHEN categories.code LIKE '%G04130101%' THEN 'Complementos Hogar y Juguetería'
-        WHEN categories.code LIKE '%G04130102%' THEN 'Complementos Hogar y Juguetería'
-        WHEN categories.code LIKE '%G04130103%' THEN 'Complementos Hogar y Juguetería'
+        WHEN categories.code LIKE '%G04080301%' THEN 'Comp. Hogar y Jugueteria'
+        WHEN categories.code LIKE '%G04080302%' THEN 'Comp. Hogar y Jugueteria'
+        WHEN categories.code LIKE '%G04090101%' THEN 'Comp. Hogar y Jugueteria'
+        WHEN categories.code LIKE '%G04090102%' THEN 'Comp. Hogar y Jugueteria'
+        WHEN categories.code LIKE '%G04090103%' THEN 'Comp. Hogar y Jugueteria'
+        WHEN categories.code LIKE '%G04090104%' THEN 'Comp. Hogar y Jugueteria'
+        WHEN categories.code LIKE '%G04100101%' THEN 'Comp. Hogar y Jugueteria'
+        WHEN categories.code LIKE '%G04100102%' THEN 'Comp. Hogar y Jugueteria'
+        WHEN categories.code LIKE '%G04100103%' THEN 'Comp. Hogar y Jugueteria'
+        WHEN categories.code LIKE '%G04100104%' THEN 'Comp. Hogar y Jugueteria'
+        WHEN categories.code LIKE '%G04100105%' THEN 'Comp. Hogar y Jugueteria'
+        WHEN categories.code LIKE '%G04100201%' THEN 'Comp. Hogar y Jugueteria'
+        WHEN categories.code LIKE '%G04100202%' THEN 'Comp. Hogar y Jugueteria'
+        WHEN categories.code LIKE '%G04110101%' THEN 'Comp. Hogar y Jugueteria'
+        WHEN categories.code LIKE '%G04110102%' THEN 'Comp. Hogar y Jugueteria'
+        WHEN categories.code LIKE '%G04110103%' THEN 'Comp. Hogar y Jugueteria'
+        WHEN categories.code LIKE '%G04110104%' THEN 'Comp. Hogar y Jugueteria'
+        WHEN categories.code LIKE '%G04110201%' THEN 'Comp. Hogar y Jugueteria'
+        WHEN categories.code LIKE '%G04110202%' THEN 'Comp. Hogar y Jugueteria'
+        WHEN categories.code LIKE '%G04110203%' THEN 'Comp. Hogar y Jugueteria'
+        WHEN categories.code LIKE '%G04120101%' THEN 'Comp. Hogar y Jugueteria'
+        WHEN categories.code LIKE '%G04120102%' THEN 'Comp. Hogar y Jugueteria'
+        WHEN categories.code LIKE '%G04120103%' THEN 'Comp. Hogar y Jugueteria'
+        WHEN categories.code LIKE '%G04130101%' THEN 'Comp. Hogar y Jugueteria'
+        WHEN categories.code LIKE '%G04130102%' THEN 'Comp. Hogar y Jugueteria'
+        WHEN categories.code LIKE '%G04130103%' THEN 'Comp. Hogar y Jugueteria'
         WHEN categories.code LIKE '%HS%' THEN 'Blandos'
         WHEN categories.code LIKE '%HM%' THEN 'Blandos'
         WHEN categories.code LIKE '%HL%' THEN 'Blandos'
@@ -337,13 +346,14 @@ SELECT
         WHEN categories.code IS NULL THEN 'Otros'
     END AS 'Linea',
     orders_groups.name AS 'Campana',
-    orders_groups.providerId AS 'Proveedor',
+    orders_groups.providerId AS 'IdProveedor',
+    providers.name AS 'NombreProveedor',
     orders.statusId AS 'StatusID',
     orders_status.name AS 'EstadoOrden',
     products_versions_attributes.value,
     manufacturers.name AS 'Marca'
 FROM
-	geelbe.orders_products
+	orders_products
 		LEFT JOIN
 	orders ON (orders_products.orderId = orders.Id)
         LEFT JOIN
@@ -355,14 +365,16 @@ FROM
         LEFT JOIN
     orders_groups ON (orders_products.groupId = orders_groups.id)
         LEFT JOIN
+    providers ON (orders_groups.providerId = providers.id)    
+        LEFT JOIN
     orders_status ON (orders.statusId = orders_status.id)
         LEFT JOIN
     products_versions_attributes ON (orders_products.versionId = products_versions_attributes.versionId)
         LEFT JOIN
     manufacturers ON (products.manufacturerId = manufacturers.id)
 WHERE
-    orders.created > '2015-11-24 00:00:00'
-        AND (orders.statusId = '2'
+    #orders.created > '2015-11-24 00:00:00' AND
+        (orders.statusId = '2'
         OR orders.statusId = '4'
         OR orders.statusId = '5'
         OR orders.statusId = '6'
@@ -371,3 +383,14 @@ WHERE
         OR orders.statusId = '12')
 GROUP BY orders.created , products.id , orders_products.versionId
 ORDER BY orders.created , orders.id;
+
+
+
+
+
+
+
+
+
+
+
