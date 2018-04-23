@@ -1,6 +1,8 @@
-DROP TABLE BQ_Acquisitions;
+# --------------- ADQUISICIONES INCLUYENTO LA TOTALIDAD DE ORDENES Y NO SOLO LAS ACEPTADAS
 
-CREATE TABLE BQ_Acquisitions
+DROP TABLE BQ_AcquisitionsSimulated;
+
+CREATE TABLE BQ_AcquisitionsSimulated
 SELECT
 	orders.id AS 'Orden',
 	CAST(orders.created AS DATE) AS 'FechaOrden',
@@ -49,14 +51,7 @@ SELECT
 			orders
 		LEFT JOIN users ON (users.id = orders.userid)
 		WHERE
-			(orders.statusId = '2'
-				OR orders.statusId = '4'
-				OR orders.statusId = '5'
-				OR orders.statusId = '6'
-				OR orders.statusId = '12'
-				OR orders.statusId = '10'
-				OR orders.statusId = '11')
-				AND (email NOT LIKE '%prueba%')
+			(email NOT LIKE '%prueba%')
 				AND (users.name NOT LIKE '%prueba%')
 				AND (users.surname != '%prueba%')
 				AND (users.id IS NOT NULL)
@@ -73,28 +68,14 @@ SELECT
 			orders
 		LEFT JOIN users ON (users.id = orders.userid)
 		WHERE
-			(orders.statusId = '2'
-				OR orders.statusId = '4'
-				OR orders.statusId = '5'
-				OR orders.statusId = '6'
-				OR orders.statusId = '12'
-				OR orders.statusId = '10'
-				OR orders.statusId = '11')
-				AND (email NOT LIKE '%prueba%')
+			(email NOT LIKE '%prueba%')
 				AND (users.name NOT LIKE '%prueba%')
 				AND (users.surname != '%prueba%')
 				AND (users.id IS NOT NULL)
 		GROUP BY users.email) AS segundo ON primero.email = segundo.email
 			AND primero.FechaPrimerPedido = segundo.fechaorden) AS lala ON users.email = lala.email
 	WHERE
-		(orders.statusId = '2'
-			OR orders.statusId = '4'
-			OR orders.statusId = '5'
-			OR orders.statusId = '6'
-			OR orders.statusId = '12'
-			OR orders.statusId = '10'
-			OR orders.statusId = '11')
-			AND (users.email NOT LIKE '%prueba%')
+			(users.email NOT LIKE '%prueba%')
 			AND (users.name NOT LIKE '%prueba%')
 			AND (users.surname != '%prueba%')
 			AND (users.id IS NOT NULL);

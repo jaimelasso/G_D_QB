@@ -15,8 +15,10 @@ SELECT
 		WHEN (products.tax IS NULL) THEN orders_products.total
         ELSE ROUND((orders_products.total / ((products.tax + 100) / 100)),1)
 	END AS 'Subtotal_SinIVA',
+    
     products.wholePrice AS 'CostoVenta',
-    ((orders_products.quantity) * (products.wholePrice)) AS 'TotalCosto',
+    ((orders_products.quantity) * (products.wholePrice)) AS 'TotalCosto_IVA',
+    ROUND(((orders_products.quantity) * (products.wholePrice)) / ((products.tax + 100) / 100), 1) AS 'TotalCosto_SinIVA',
     products.originalPrice AS 'PrecioMercado',
     
     CASE
@@ -347,10 +349,12 @@ SELECT
     END AS 'Linea',
     orders_groups.name AS 'Campana',
     orders_groups.providerId AS 'IdProveedor',
+    providers.cif AS 'NIT',
     providers.name AS 'NombreProveedor',
     orders.statusId AS 'StatusID',
     orders_status.name AS 'EstadoOrden',
     products_versions_attributes.value,
+    manufacturers.id AS 'IdMarca',
     manufacturers.name AS 'Marca'
 FROM
 	orders_products
@@ -373,7 +377,7 @@ FROM
         LEFT JOIN
     manufacturers ON (products.manufacturerId = manufacturers.id)
 WHERE
-    #orders.created > '2015-11-24 00:00:00' AND
+	orders.created > '2015-11-24 00:00:00' AND
         (orders.statusId = '2'
         OR orders.statusId = '4'
         OR orders.statusId = '5'
@@ -381,13 +385,15 @@ WHERE
         OR orders.statusId = '10'
         OR orders.statusId = '11'
         OR orders.statusId = '12')
-GROUP BY orders.created , products.id , orders_products.versionId
+GROUP BY orders_products.id, orders.created , orders_products.productId, products.name, orders_products.versionId
 ORDER BY orders.created , orders.id;
 
 
 
 
+SELECT * FROM V_ProductLines;
 
+SELECT * FROM BQ_ProductsLines;
 
 
 

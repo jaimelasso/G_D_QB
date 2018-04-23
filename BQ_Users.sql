@@ -1,13 +1,62 @@
 SELECT
-	CAST(geelbe.users.created as DATE) as 'FechaRegistro',
-	geelbe.users.id AS 'IdUsuario',
-	geelbe.users.email AS 'Mail',
-	geelbe.users.invitationCode AS 'Código_invitacion'
-
+	CAST(users.created as DATE) as 'FechaRegistro',
+	users.id AS 'IdUsuario',
+	users.email AS 'Mail',
+    users.name AS 'Nombre',
+    users.surname AS 'Apellido',
+    users.sex AS 'Género',
+    TIMESTAMPDIFF(YEAR,users.birthdate, CURDATE()) AS 'Edad'
 FROM
-	geelbe.users
+	geelbe.users;
 
 WHERE
 	(geelbe.users.created >= '2018-01-01 00:00:00');
 
-#ORDER BY ventaspop2_davivienda.users.created;
+#ORDER BY ventaspop2_davivienda.users.created;	
+
+SELECT * FROM users;
+
+SELECT
+	users.id,
+	users.email,
+    users.subscribed,
+    users.unsubscribedDate,
+    users.active,
+    users.lastLogin,
+    users.created
+FROM
+	users;
+    
+
+
+
+
+
+
+
+
+
+
+
+# -------------------
+
+SELECT
+	BQ_Acquisitions.FechaOrden,
+    BQ_Acquisitions.Orden,
+    BQ_Acquisitions.Email,
+    BQ_Acquisitions.TipoOrden,
+    BQ_Acquisitions.FuenteFinal
+FROM
+	BQ_Acquisitions;
+    
+
+
+SELECT
+	BQ_AcquisitionsSimulated.FechaOrden,
+    BQ_AcquisitionsSimulated.Orden,
+    BQ_AcquisitionsSimulated.Orden AS 'OrderDimension',
+    BQ_AcquisitionsSimulated.Email,
+    BQ_AcquisitionsSimulated.TipoOrden,
+    BQ_AcquisitionsSimulated.FuenteFinal
+FROM
+	BQ_AcquisitionsSimulated;
