@@ -4,10 +4,11 @@ SELECT
 	users.email AS 'Mail',
     users.name AS 'Nombre',
     users.surname AS 'Apellido',
+    users.billingTel AS 'Telefono',
     users.sex AS 'Género',
     TIMESTAMPDIFF(YEAR,users.birthdate, CURDATE()) AS 'Edad'
 FROM
-	geelbe.users;
+	users;
 
 WHERE
 	(geelbe.users.created >= '2018-01-01 00:00:00');

@@ -37,8 +37,8 @@ SELECT
 FROM
 	BQ_ProductsLines
 WHERE
-	BQ_ProductsLines.FechaOrden >= '2018-01-01 00:00:00' AND
-    BQ_ProductsLines.FechaOrden <= '2018-01-31 11:59:59';
+	BQ_ProductsLines.FechaOrden >= '2018-02-01 00:00:00' AND
+    BQ_ProductsLines.FechaOrden <= '2018-02-28 11:59:59';
     
 SELECT * FROM orders_products WHERE orders_products.orderId = '2020116';
 SELECT * FROM BQ_ProductsLines WHERE BQ_ProductsLines.IdOrden = '2020116';
@@ -46,4 +46,19 @@ SELECT * FROM BQ_ProductsLines WHERE BQ_ProductsLines.IdOrden = '2020116';
 SELECT * FROM orders_products;
     
 SELECT * FROM users WHERE users.email = 'angelitogonzabuitrago@gmail.com';
+
+SELECT * FROM orders_products WHERE orders_products.orderId = '2007848';
+
+SELECT * FROM BQ_ProductsLines;
+
+SELECT
+	BQ_ProductsLines.FechaOrden,
+	YEAR(BQ_ProductsLines.FechaOrden) AS 'Anio',
+    MONTHNAME(BQ_ProductsLines.FechaOrden) AS 'Mes',
+	BQ_ProductsLines.IdOrden,
+    SUM(BQ_ProductsLines.Cantidad)
+FROM
+	BQ_ProductsLines
+GROUP BY
+	BQ_ProductsLines.IdOrden;
     
