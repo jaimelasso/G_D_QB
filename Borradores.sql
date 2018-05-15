@@ -62,3 +62,112 @@ FROM
 GROUP BY
 	BQ_ProductsLines.IdOrden;
     
+    
+    
+    
+SELECT
+	BQ_Acquisitions.AnioOrden AS 'Anio',
+    BQ_Acquisitions.MesOrden AS 'Mes',
+    BQ_Acquisitions.Email AS 'Email',
+    BQ_Acquisitions.Orden AS 'OrderID',
+    BQ_Acquisitions.TipoOrden AS 'TipoOrden'
+FROM
+	BQ_Acquisitions;
+    
+SELECT users.email FROM users;
+
+SELECT
+	BQ_Acquisitions.FechaOrden,
+    BQ_Acquisitions.Email,
+    BQ_Acquisitions.Orden,
+    BQ_Acquisitions.Source_name
+FROM
+	BQ_Acquisitions
+WHERE
+	BQ_Acquisitions.Email = 'jaime@corp.geelbe.com';
+    
+SELECT * FROM BQ_ProductsLines WHERE BQ_ProductsLines.FechaOrden >= '2017-01-01 00:00:00';
+
+SELECT * FROM BQ_Acquisitions WHERE BQ_Acquisitions.FechaOrden >= '2018-01-01 00:00:00';
+
+SELECT
+	COUNT(DISTINCT(orders.userId))
+FROM
+	orders
+		WHERE
+			(orders.statusId = '2'
+				OR orders.statusId = '4'
+				OR orders.statusId = '5'
+				OR orders.statusId = '6'
+				OR orders.statusId = '12'
+				OR orders.statusId = '10'
+				OR orders.statusId = '11');
+                
+                
+                
+# Cantidad total de usuarios activos a la fecha
+
+SELECT
+	COUNT(DISTINCT(BQ_Orders.Email)) AS 'Cantidad Usuarios',
+    COUNT(BQ_Orders.IdOrden) AS 'Cantidad ordenes'
+FROM
+	BQ_Orders
+WHERE
+	BQ_Orders.StatusAgrupado = 'Aceptada' AND
+    BQ_Orders.FechaOrden BETWEEN DATE_SUB(CURDATE(), INTERVAL 365 DAY) AND CURDATE();
+    
+    
+
+
+SELECT
+	BQ_ProductsLines.Contribucion_IVA
+FROM
+	BQ_ProductsLines;
+    
+    
+SELECT
+	BQ_Orders.FechaOrden,
+    BQ_Orders.IdOrden,
+    BQ_Orders.Email
+FROM
+	BQ_Orders
+WHERE
+	BQ_Orders.FechaOrden >= '2016-01-01 00:00:00' AND
+    BQ_Orders.StatusAgrupado = 'Aceptada';
+
+SELECT
+	BQ_Acquisitions.FechaOrden,
+    BQ_Acquisitions.Orden,
+    BQ_Acquisitions.TipoOrden
+FROM
+	BQ_Acquisitions
+WHERE
+	BQ_Acquisitions.FechaOrden >= '2016-01-01 00:00:00';
+    
+    
+    
+# --------------
+    
+    
+SELECT * FROM geelbe.orders_groups
+WHERE geelbe.orders_groups.orderId = '734888';
+
+ 
+
+#---
+SELECT * FROM BQ_OrdersDiscounts 
+WHERE BQ_OrdersDiscounts.FechaOrden >= '2018-04-01 00:00:00' 
+        AND BQ_OrdersDiscounts.StatusAgrupado = 'Aceptada';
+
+
+#---
+SELECT
+	BQ_OrdersDiscounts.Anio,
+    BQ_OrdersDiscounts.Mes,
+    SUM(BQ_OrdersDiscounts.Descuento) as 'Descuento'
+FROM
+	BQ_OrdersDiscounts
+WHERE
+	BQ_OrdersDiscounts.StatusAgrupado = 'Aceptada'
+GROUP BY
+	BQ_OrdersDiscounts.Anio, BQ_OrdersDiscounts.mes;

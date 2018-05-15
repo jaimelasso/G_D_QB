@@ -91,8 +91,8 @@ SELECT
     YEAR(BQ_ProductsLines.FechaOrden) AS 'Anio',
     MONTHNAME(BQ_ProductsLines.FechaOrden) AS 'Mes',
     BQ_ProductsLines.Linea,
-    BQ_ProductsLines.Marca,
     BQ_ProductsLines.NombreProveedor AS 'Proveedor',
+    BQ_ProductsLines.Marca,
     BQ_ProductsLines.NIT,
     SUM(BQ_ProductsLines.Cantidad) AS 'Cantidad',
     SUM(BQ_ProductsLines.Subtotal_IVA) AS 'Subtotal_IVA',
@@ -104,6 +104,6 @@ SELECT
 FROM
 	BQ_ProductsLines
 GROUP BY
-	Anio, Mes, BQ_ProductsLines.Linea, BQ_ProductsLines.Marca, BQ_ProductsLines.NombreProveedor
+	Anio, Mes, BQ_ProductsLines.Linea, BQ_ProductsLines.IdProveedor, BQ_ProductsLines.Marca
 ORDER BY
 	BQ_ProductsLines.FechaOrden;
