@@ -171,3 +171,43 @@ WHERE
 	BQ_OrdersDiscounts.StatusAgrupado = 'Aceptada'
 GROUP BY
 	BQ_OrdersDiscounts.Anio, BQ_OrdersDiscounts.mes;
+    
+    
+
+
+# ----
+    
+SELECT
+	BQ_Orders.FechaOrden,
+    BQ_Orders.IdOrden,
+    BQ_Orders.Email,
+    BQ_Orders.IVA,
+    BQ_Orders.Subtotal_IVA,
+    BQ_Orders.Subtotal_SinIVA,
+    BQ_Orders.Creditos,
+    BQ_Orders.CostoEnvio,
+    BQ_Orders.Total
+FROM
+	BQ_Orders
+WHERE
+	BQ_Orders.FechaOrden >= '2018-01-01 00:00:00' AND
+    BQ_Orders.StatusAgrupado = 'Aceptada';
+    
+
+SELECT
+	BQ_ProductsLines.FechaOrden,
+    BQ_ProductsLines.IdOrden,
+    BQ_ProductsLines.IVA,
+    BQ_ProductsLines.Subtotal_IVA,
+    BQ_ProductsLines.Subtotal_SinIVA,
+    BQ_ProductsLines.Producto,
+    BQ_ProductsLines.Cantidad,
+    BQ_ProductsLines.PrecioVenta,
+    BQ_ProductsLines.CostoVenta,
+    BQ_ProductsLines.Contribucion_IVA,
+    BQ_ProductsLines.Contribucion_SinIVA,
+    BQ_ProductsLines.Linea
+FROM
+	BQ_ProductsLines
+WHERE
+	BQ_ProductsLines.FechaOrden >= '2018-01-01 00:00:00';

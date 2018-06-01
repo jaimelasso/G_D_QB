@@ -8,7 +8,8 @@ SELECT
     products.name AS 'Producto',
     orders_products.quantity AS 'Cantidad',
     orders_products.price AS 'PrecioVenta',
-    products.tax AS 'IVA',
+    products.tax AS 'IVA1',
+    orders_products.tax AS 'IVA2',
     orders_products.total AS 'Subtotal_IVA',
     
     CASE
@@ -387,14 +388,6 @@ WHERE
         OR orders.statusId = '12')
 GROUP BY orders_products.id, orders.created , orders_products.productId, products.name, orders_products.versionId
 ORDER BY orders.created , orders.id;
-
-
-
-
-SELECT * FROM V_ProductLines;
-
-SELECT * FROM BQ_ProductsLines;
-
 
 
 
