@@ -1,12 +1,12 @@
-DROP TABLE BQ_OrdersDiscounts;
+DROP TABLE IF EXISTS BQ_OrdersDiscounts;
 
 CREATE TABLE BQ_OrdersDiscounts
-
 SELECT
 	orders.created AS 'FechaOrden',
     YEAR(orders.created) AS 'Anio',
     MONTHNAME(orders.created) AS 'Mes',    
     orders_groups.orderId AS 'IdOrden',
+	users.email AS 'Email',
     orders_groups.code AS 'Parte',
     orders_status.name AS 'StatusOrden',
 	CASE
@@ -35,15 +35,16 @@ SELECT
         WHEN discounts.description LIKE 'gb_mkt_oso_ord%' THEN 'MKT Owned Social - ORD'
         WHEN discounts.description LIKE 'gb_mkt_pso_acq%' THEN 'MKT Paid Social - ACQ'
         WHEN discounts.description LIKE 'gb_ops_cca_ord%' THEN 'OPE Customer Care - ORD'
-		WHEN discounts.description LIKE 'gb_ops_ops_ord%' THEN 'OPE Operations - ORD'
 		WHEN discounts.description LIKE 'gb_sls_mee_ord%' THEN 'SAL Meetings - ORD'
 		WHEN discounts.description LIKE 'gb_sls_par_ord%' THEN 'SAL Partnerships - ORD'
 		WHEN discounts.description LIKE 'Primera Compra Concretada%' THEN 'Plan 11/11'	
 		WHEN discounts.description LIKE '%Especial Clientes Geelbe%' THEN 'Clientes Geelbe'    
         WHEN discounts.description LIKE 'Descuento Geelbe Empleados' THEN 'Geelbers'
+        WHEN discounts.description LIKE '%employees' THEN 'Geelbers'
         ELSE 'Descuento Sin Agrupar'
     END AS 'DescuentoAgrupado',
     
+    discounts.code AS 'PROMOCODE',
     ROUND(AVG(orders_groups.discount), 0) AS 'Descuento',
     ROUND(AVG(orders_groups.subtotal), 0) AS 'Subtotal',
     ROUND(AVG(orders_groups.credits), 0) AS 'Créditos',
@@ -56,6 +57,9 @@ LEFT JOIN orders
     
 LEFT JOIN orders_status
 	ON (orders_groups.statusId = orders_status.id)    
+
+LEFT JOIN users 
+ON (users.id = orders.userid) 
 
 LEFT JOIN
 	(SELECT

@@ -14,6 +14,7 @@ CASE
 		  orders_status.id = 10 OR
 		  orders_status.id = 11 OR
 		  orders_status.id = 12) THEN 'Aceptada'
+	WHEN (orders.total = 0) THEN 'Eliminada'
 	ELSE 'Rechazada'
 END AS 'StatusAgrupado',
    	orders.tax AS 'IVA',
