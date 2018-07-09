@@ -3,7 +3,9 @@ DROP TABLE IF EXISTS BQ_Orders;
 CREATE TABLE BQ_Orders
 SELECT
    	CAST(orders.created AS DATE) AS 'FechaOrden',
+    YEAR(orders.created) * 100 + MONTH(orders.created) AS 'Anio_Mes',
    	orders.id AS 'IdOrden',
+    users.id AS 'IdUsuario',
     users.email AS 'Email',
    	orders_status.name AS 'StatusOrden',
 CASE
@@ -19,7 +21,7 @@ CASE
 END AS 'StatusAgrupado',
    	orders.tax AS 'IVA',
    	orders.subtotal AS 'Subtotal_IVA',
-    ROUND((orders.subtotal - orders.tax),1) AS 'Subtotal_SinIVA',    
+    ROUND((orders.subtotal - orders.tax),1) AS 'Subtotal_SinIVA',
    	orders.discount 'Descuento',
    	orders.credits AS 'Creditos',
    	orders.shipping AS 'CostoEnvio',

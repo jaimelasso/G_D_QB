@@ -6,6 +6,7 @@ SELECT
     YEAR(orders.created) AS 'Anio',
     MONTHNAME(orders.created) AS 'Mes',    
     orders_groups.orderId AS 'IdOrden',
+    users.id AS 'IdUsuario',
 	users.email AS 'Email',
     orders_groups.code AS 'Parte',
     orders_status.name AS 'StatusOrden',
@@ -19,6 +20,7 @@ SELECT
 			  orders_status.id = 12) THEN 'Aceptada'
 		ELSE 'Rechazada'
 	END AS 'StatusAgrupado',        
+    orders_groups.campaignId AS 'IdCampania',
     orders_groups.name AS 'Campania',
     discounts.description AS 'Descripcion',
     CASE

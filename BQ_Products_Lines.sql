@@ -3,7 +3,9 @@ DROP TABLE IF EXISTS BQ_ProductsLines;
 CREATE TABLE BQ_ProductsLines
 SELECT
     CAST(orders.created AS DATE) AS 'FechaOrden',
+    YEAR(orders.created) * 100 + MONTH(orders.created) AS 'Anio_Mes',
     orders.id AS 'IdOrden',
+    orders.userId AS 'IdUsuario',
     orders_products.productId AS 'IdProducto',
     products.name AS 'Producto',
     products.manufacturerSku AS 'SKU',
@@ -32,7 +34,7 @@ SELECT
         ELSE ROUND((((orders_products.price - products.wholePrice) * orders_products.quantity) / ((products.tax + 100) / 100)),1)
     END AS 'Contribucion_SinIVA',
 
-    categories.code AS categoriaId,
+    categories.code AS 'categoriaId',
     BQ_Jerarquias.desclinea AS 'Categoria',
     BQ_Jerarquias.linea AS 'Linea',
     orders_groups.campaignId AS 'IdCampana',
