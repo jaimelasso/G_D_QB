@@ -2,6 +2,7 @@ DROP TABLE IF EXISTS BQ_ProductsLines;
 
 CREATE TABLE BQ_ProductsLines
 SELECT
+	orders.created AS 'MesDiaHora',
     CAST(orders.created AS DATE) AS 'FechaOrden',
     YEAR(orders.created) * 100 + MONTH(orders.created) AS 'Anio_Mes',
     orders.id AS 'IdOrden',
