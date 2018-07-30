@@ -35,9 +35,18 @@ SELECT
         ELSE ROUND((((orders_products.price - products.wholePrice) * orders_products.quantity) / ((products.tax + 100) / 100)),1)
     END AS 'Contribucion_SinIVA',
 
-    categories.code AS 'categoriaId',
+    BQ_Jerarquias.codlinea AS 'IDCategoria',
     BQ_Jerarquias.desclinea AS 'Categoria',
-    BQ_Jerarquias.linea AS 'Linea', 
+    BQ_Jerarquias.codsublinea AS 'IDSubcategoria',
+    BQ_Jerarquias.descsublinea AS 'Subcategoria',
+    BQ_Jerarquias.codclase AS 'IDClase',
+    BQ_Jerarquias.descclase AS 'Clase',
+    BQ_Jerarquias.codsubclase AS 'IDSubclase',
+    BQ_Jerarquias.descsubclase AS 'Subclase',
+    BQ_Jerarquias.linea AS 'Linea',
+
+    categories.code AS 'categoriaId',
+	  
     orders_groups.campaignId AS 'IdCampana',
     orders_groups.name AS 'Campana',
     orders_groups.providerId AS 'IdProveedor',
