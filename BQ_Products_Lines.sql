@@ -37,7 +37,7 @@ SELECT
 
     categories.code AS 'categoriaId',
     BQ_Jerarquias.desclinea AS 'Categoria',
-    BQ_Jerarquias.linea AS 'Linea',
+    BQ_Jerarquias.linea AS 'Linea', 
     orders_groups.campaignId AS 'IdCampana',
     orders_groups.name AS 'Campana',
     orders_groups.providerId AS 'IdProveedor',

@@ -2,6 +2,7 @@ DROP TABLE IF EXISTS BQ_OrdersDiscounts;
 
 CREATE TABLE BQ_OrdersDiscounts
 SELECT
+	orders.created AS 'MesDiaHora',
 	orders.created AS 'FechaOrden',
     YEAR(orders.created) AS 'Anio',
     MONTHNAME(orders.created) AS 'Mes',    

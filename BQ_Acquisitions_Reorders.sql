@@ -1,8 +1,9 @@
-DROP TABLE BQ_Acquisitions;
+DROP TABLE IF EXISTS BQ_Acquisitions;
 
 CREATE TABLE BQ_Acquisitions
 SELECT 
     orders.id AS 'Orden',
+	orders.created AS 'MesDiaHora',
     CAST(orders.created AS DATE) AS 'FechaOrden',
     YEAR(orders.created) AS 'AnioOrden',
     MONTHNAME(orders.created) AS 'MesOrden',

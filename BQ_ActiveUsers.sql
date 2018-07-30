@@ -16,8 +16,8 @@ SELECT
     TIMESTAMPDIFF(YEAR, users.birthdate, CURDATE()) AS 'Edad',
     users.lastLogin AS 'Fecha ultimo ingreso',
     users.lastPurchase AS 'Fecha ultima compra',
-    COUNT(DISTINCT (orders.id)) AS 'Ordenes',
-    SUM(orders.total) as 'Ventas'
+    COUNT(DISTINCT (orders.id)) AS 'Cantidad Ordenes',
+    SUM(orders.total) as 'GMV'
 FROM
     users
         LEFT JOIN
