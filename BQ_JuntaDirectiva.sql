@@ -1,3 +1,23 @@
+# --Consulta que muestra las órdenes de cada mes que fueron usadas para los cálculos financieros.
+# -IMPORTANTE: Revisar mes a mes por qué varía la data.
+SELECT
+	BQ_ProductsLines.FechaOrden,
+	BQ_ProductsLines.IdOrden,
+	BQ_ProductsLines.StatusID,
+	BQ_ProductsLines.EstadoOrden,
+	BQ_ProductsLines.Producto,
+	BQ_ProductsLines.Cantidad,
+	BQ_ProductsLines.Subtotal_IVA,
+	BQ_ProductsLines.Subtotal_SinIVA,
+	BQ_ProductsLines.TotalCosto_IVA,
+	BQ_ProductsLines.TotalCosto_SinIVA
+FROM
+	BQ_ProductsLines
+WHERE
+	BQ_ProductsLines.FechaOrden >= '2018-08-01';
+
+
+
 
 # -- USAR ESTE QUERY PARA ALIMENTAR DATA DE GSHEETS "Data Gráfica Informe Junta Directiva v1", hoja: "Data Query (Ingreso y costo bruto)".
 # - Importante tener presente que un escenario es con todos los estados ACEPTADOS y el otro es sin códigos 10 y 11.
@@ -28,6 +48,7 @@ WHERE
 # -Todos los estados.
 SELECT
 	BQ_ProductsLines.Anio_Mes AS 'Anio_mes',
+	COUNT(DISTINCT(BQ_ProductsLines.IdOrden)) AS '# Orden',	
     SUM(BQ_ProductsLines.Subtotal_SinIVA) AS 'Ingreso sin IVA',
     SUM(BQ_ProductsLines.TotalCosto_SinIVA) AS 'Costo sin IVA'
 FROM
@@ -40,6 +61,7 @@ GROUP BY
 # -Sin estados: Devolución de Dinero (10) y Reversado (11).
 SELECT
 	BQ_ProductsLines.Anio_Mes AS 'Anio_mes',
+	COUNT(DISTINCT(BQ_ProductsLines.IdOrden)) AS '# Orden',
     SUM(BQ_ProductsLines.Subtotal_SinIVA) AS 'Ingreso sin IVA',
     SUM(BQ_ProductsLines.TotalCosto_SinIVA) AS 'Costo sin IVA'
 FROM
@@ -56,6 +78,7 @@ GROUP BY
 # -Todos los estados. (Es excluye ventas por Marketplace, identificados como NULL en IVA.
 SELECT
 	BQ_ProductsLines.Anio_Mes AS 'Anio_mes',
+	COUNT(DISTINCT(BQ_ProductsLines.IdOrden)) AS '# Orden',	
     SUM(BQ_ProductsLines.Subtotal_SinIVA) AS 'Ingreso sin IVA',
     SUM(BQ_ProductsLines.TotalCosto_SinIVA) AS 'Costo sin IVA'
 FROM
@@ -69,6 +92,7 @@ GROUP BY
 # -Sin estados: Devolución de Dinero (10) y Reversado (11). (Se excluye ventas por Marketplace, identificados como NULL en IVA.
 SELECT
 	BQ_ProductsLines.Anio_Mes AS 'Anio_mes',
+	COUNT(DISTINCT(BQ_ProductsLines.IdOrden)) AS '# Orden',	
     SUM(BQ_ProductsLines.Subtotal_SinIVA) AS 'Ingreso sin IVA',
     SUM(BQ_ProductsLines.TotalCosto_SinIVA) AS 'Costo sin IVA'
 FROM
@@ -138,7 +162,8 @@ SELECT
 	YEAR(BQ_ProductsLines.FechaOrden) * 100 + month(BQ_ProductsLines.FechaOrden) AS 'Anio_mes',
     SUM(BQ_ProductsLines.Subtotal_IVA) AS 'Subtotal IVA',
     SUM(BQ_ProductsLines.Subtotal_SinIVA) AS 'Subtotal sin IVA',
-    SUM(BQ_ProductsLines.Subtotal_IVA - BQ_ProductsLines.Subtotal_SinIVA) AS 'IVA en $'
+    SUM(BQ_ProductsLines.Subtotal_IVA - BQ_ProductsLines.Subtotal_SinIVA) AS 'IVA en $',
+    SUM(BQ_ProductsLines.TotalCosto_IVA) AS 'Costo IVA'
 FROM
 	BQ_ProductsLines
 WHERE
@@ -188,7 +213,7 @@ GROUP BY Anio_mes
 ORDER BY Anio_mes ASC;
 
 
-# --Contribución Bruta ($)
+# --5) Contribución Bruta ($)
 # Cálculo: Venta Bruta (Subtotal IVA) - Costo Bruto (Total Costo IVA)
 
 SELECT
@@ -201,10 +226,7 @@ FROM
 GROUP BY Anio_mes
 ORDER BY Anio_mes ASC;
 
-# --Cantidad de nuevas marcas
-# Pendiente.
-
-# --Venta por categoría en GMV (%)
+# --Venta por categoría en GMV (%) (PENDIENTE)
 # Se calcula con base a Subtotal_IVA ya que el GMV no puede ser discriminado (aún) por Línea.
 # Query usado para análisis: Unidades vendidas, Tiquete promedio, Descuento promedio y margen de contribución.
 # Hacer tabla dinámica en Excel para obtener ventas acumuladas 2018.
@@ -245,10 +267,17 @@ GROUP BY
 ORDER BY
 	Anio_mes ASC;
 
+# -Campañas activas
+SELECT 
+    YEAR(campaigns.start) * 100 + MONTH(campaigns.START) AS 'Anio_Mes',
+    COUNT(DISTINCT (campaigns.id)) AS '# Campañas'
+FROM
+    campaigns
+GROUP BY YEAR(campaigns.start) * 100 + MONTH(campaigns.start);
 
 # -Productos, Marcas y Proveedores activos
 SELECT 
-    YEAR(products.created) * 100 + MONTH(products.created),
+    YEAR(products.created) * 100 + MONTH(products.created) AS 'Anio_mes',
     COUNT(DISTINCT (products.id)) AS productos,
     COUNT(DISTINCT (products.manufacturerId)) AS Marcas,
     COUNT(DISTINCT (manufacturers_providers.providerId)) AS Proveedores
@@ -258,13 +287,6 @@ FROM
     manufacturers_providers ON (products.manufacturerId = manufacturers_providers.manufacturerId)
 GROUP BY YEAR(products.created) * 100 + MONTH(products.created);
 
-# -Campañas activas
-SELECT 
-    YEAR(campaigns.start) * 100 + MONTH(campaigns.start),
-    COUNT(DISTINCT (campaigns.id))
-FROM
-    campaigns
-GROUP BY YEAR(campaigns.start) * 100 + MONTH(campaigns.start);
 
 
 
@@ -318,9 +340,9 @@ FROM
 	BQ_Acquisitions
 WHERE
 	BQ_Acquisitions.TipoOrden = 'Adquisición'
-    #AND BQ_Acquisitions.Source_name = 'Movil App'
-    #AND BQ_Acquisitions.Source_name = 'Movil Web'
-    #AND BQ_Acquisitions.Source_name = 'Web'
+   #AND BQ_Acquisitions.Source_name = 'Movil App'
+   #AND BQ_Acquisitions.Source_name = 'Movil Web'
+   #AND BQ_Acquisitions.Source_name = 'Web'
 GROUP BY Anio_mes
 ORDER BY Anio_mes ASC;
 
@@ -338,15 +360,24 @@ ORDER BY Anio_mes ASC;
 #-- Ordenes aceptadas vs rechazadas
 
 SELECT
-	YEAR(BQ_Orders.FechaOrden) * 100 + month(BQ_Orders.FechaOrden) AS 'Anio_mes',
-	COUNT(BQ_Orders.IdOrden),
-    BQ_Orders.StatusAgrupado AS 'StatusA'
+	Rechazos.Anio_mes,
+    COUNT(Rechazos.Email) AS '# Ordenes rechazadas con filtro',
+    SUM(Rechazos.Ordenes) AS '# Órdenes rechazadas total'
 FROM
-	BQ_Orders 
-WHERE 
-	BQ_Orders.FechaOrden >= '2017-05-01 00:00:00'
-GROUP BY Anio_mes, StatusA
-ORDER BY Anio_mes, StatusA ASC;
+	(SELECT
+		BQ_Orders.Anio_Mes AS 'Anio_mes',
+		BQ_Orders.Email AS 'Email',
+		COUNT(DISTINCT(BQ_Orders.IdOrden)) AS 'Ordenes',
+		BQ_Orders.Subtotal_IVA AS 'Venta'
+	FROM
+		BQ_Orders
+	WHERE
+		BQ_Orders.StatusAgrupado = 'Rechazada'
+		AND BQ_Orders.FechaOrden >= '2017-01-01'
+	GROUP BY
+		Anio_Mes, Email, Venta) as Rechazos
+GROUP BY
+	Rechazos.Anio_mes;    
 
 
 #-- Detalle ordenes rechazas
