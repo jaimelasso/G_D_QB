@@ -21,28 +21,7 @@ WHERE
 
 # -- USAR ESTE QUERY PARA ALIMENTAR DATA DE GSHEETS "Data Gráfica Informe Junta Directiva v1", hoja: "Data Query (Ingreso y costo bruto)".
 # - Importante tener presente que un escenario es con todos los estados ACEPTADOS y el otro es sin códigos 10 y 11.
-# - Estos filtros se realizan en Excel (antes) - Se han generados queries para resumen de información. 
 
-# - Este Query es por si se requiere detalle (Ya no se usa)
-SELECT 
-	YEAR(BQ_ProductsLines.FechaOrden) AS 'Anio',
-    MONTHNAME(BQ_ProductsLines.FechaOrden) AS 'Mes',
-    YEAR(BQ_ProductsLines.FechaOrden) * 100 + MONTH(BQ_ProductsLines.FechaOrden) AS 'Anio_mes',    
-    BQ_ProductsLines.IdOrden,
-    BQ_ProductsLines.StatusID,
-    BQ_ProductsLines.IdProducto,
-    BQ_ProductsLines.TotalCosto_IVA,
-    BQ_ProductsLines.TotalCosto_SinIVA,
-    BQ_ProductsLines.Subtotal_IVA,
-    BQ_ProductsLines.Subtotal_SinIVA,
-    BQ_ProductsLines.IVA,
-	orders_status.name AS 'Status Orden'
-FROM
-	BQ_ProductsLines
-LEFT JOIN orders_status
-	ON (orders_status.id = BQ_ProductsLines.StatusID)
-WHERE
-	BQ_ProductsLines.FechaOrden >= '2018-01-01 00:00:00';
     
 # --Query Resumen GEELBE
 # -Todos los estados.
@@ -130,6 +109,7 @@ SELECT
 	YEAR(BQ_ProductsLines.FechaOrden) * 100 + month(BQ_ProductsLines.FechaOrden) AS 'Anio_mes',
     SUM(BQ_ProductsLines.Subtotal_IVA) AS 'Subtotal IVA',
     SUM(BQ_ProductsLines.Subtotal_SinIVA) AS 'Subtotal sin IVA',
+    SUM(BQ_ProductsLines.TotalCosto_IVA) AS 'Costo IVA',
     SUM(BQ_ProductsLines.Subtotal_IVA - BQ_ProductsLines.Subtotal_SinIVA) AS 'IVA en $'
 FROM
 	BQ_ProductsLines
@@ -162,8 +142,8 @@ SELECT
 	YEAR(BQ_ProductsLines.FechaOrden) * 100 + month(BQ_ProductsLines.FechaOrden) AS 'Anio_mes',
     SUM(BQ_ProductsLines.Subtotal_IVA) AS 'Subtotal IVA',
     SUM(BQ_ProductsLines.Subtotal_SinIVA) AS 'Subtotal sin IVA',
-    SUM(BQ_ProductsLines.Subtotal_IVA - BQ_ProductsLines.Subtotal_SinIVA) AS 'IVA en $',
-    SUM(BQ_ProductsLines.TotalCosto_IVA) AS 'Costo IVA'
+    SUM(BQ_ProductsLines.TotalCosto_IVA) AS 'Costo IVA',
+    SUM(BQ_ProductsLines.Subtotal_IVA - BQ_ProductsLines.Subtotal_SinIVA) AS 'IVA en $'
 FROM
 	BQ_ProductsLines
 WHERE
@@ -183,12 +163,13 @@ WHERE
 GROUP BY
 	Anio_Mes;
 
-------------------------
+----------------------------------------------------------------------------------------------------------------------------------------------
 
 
 # --Ordenes totales, GMV y Tiquete Promedio
-# Nota: Tener presente variación de cantidades debido a órdenes con subtotal 0 en tabla orders. Dato referencia: Enero 2018 (5.505).
-# Nota: Se toma variable "orders.Total" para cálculo GMV debido a diferencias entre BackOffice y tabla BDD.
+# -Hoja: "Ventas", Tablas: 1, 2 y 3.
+# Nota 1: Tener presente variación de cantidades debido a órdenes con subtotal 0 en tabla orders. Dato referencia: Enero 2018 (5.505).
+# Nota 2: Se toma variable "orders.Total" para cálculo GMV debido a diferencias entre BackOffice y tabla BDD.
 
 SELECT
 	YEAR(BQ_Orders.FechaOrden) * 100 + month(BQ_Orders.FechaOrden) AS 'Anio_mes',
@@ -203,7 +184,7 @@ GROUP BY Anio_mes
 ORDER BY Anio_mes ASC;
 
 # --Ventas
-# -Se encuentra en hoja: "Data nuevas gráficas"
+# -Hoja: "Data nuevas gráficas", Tablas: 4
 SELECT
 	YEAR(BQ_ProductsLines.FechaOrden) * 100 + month(BQ_ProductsLines.FechaOrden) AS 'Anio_mes',
 	ROUND(SUM(BQ_ProductsLines.Subtotal_SinIVA), 0) AS 'Subtotal Sin IVA'
@@ -214,6 +195,7 @@ ORDER BY Anio_mes ASC;
 
 
 # --5) Contribución Bruta ($)
+# -Hoja: "Ventas", Tablas: 5.
 # Cálculo: Venta Bruta (Subtotal IVA) - Costo Bruto (Total Costo IVA)
 
 SELECT
@@ -254,6 +236,7 @@ ORDER BY
 
 
 # --% Descuento y % Contribución TOTAL
+# -Hoja: "Data Nuevas Gráficas", Tablas: 10 y 11.
 SELECT
 	YEAR(BQ_ProductsLines.FechaOrden) * 100 + MONTH(BQ_ProductsLines.FechaOrden) AS 'Anio_mes',
     1 - (SUM(BQ_ProductsLines.PrecioVenta) / SUM(BQ_ProductsLines.PrecioMercado)) AS '% Descuento',
@@ -267,15 +250,9 @@ GROUP BY
 ORDER BY
 	Anio_mes ASC;
 
-# -Campañas activas
-SELECT 
-    YEAR(campaigns.start) * 100 + MONTH(campaigns.START) AS 'Anio_Mes',
-    COUNT(DISTINCT (campaigns.id)) AS '# Campañas'
-FROM
-    campaigns
-GROUP BY YEAR(campaigns.start) * 100 + MONTH(campaigns.start);
 
 # -Productos, Marcas y Proveedores activos
+# -Hoja: "Data Nuevas Gráficas", Tablas: 12 y 13.
 SELECT 
     YEAR(products.created) * 100 + MONTH(products.created) AS 'Anio_mes',
     COUNT(DISTINCT (products.id)) AS productos,
@@ -288,11 +265,24 @@ FROM
 GROUP BY YEAR(products.created) * 100 + MONTH(products.created);
 
 
+# -Campañas activas
+# -Hoja: "Data Nuevas Gráficas", Tablas: 14.
+SELECT 
+    YEAR(campaigns.start) * 100 + MONTH(campaigns.START) AS 'Anio_Mes',
+    COUNT(DISTINCT (campaigns.id)) AS '# Campañas'
+FROM
+    campaigns
+GROUP BY YEAR(campaigns.start) * 100 + MONTH(campaigns.start);
+
+
+
+
 
 
 # --------------------------------------------------------------- MARKETING
 
 # --Usuarios con más de una orden por periodo
+# -Hoja: "Mercadeo", Tablas: 4.
 # Nota: Se debe exportar a excel, hacer tabla dinámica y filtrar solo por los de más de 1 orden.
 SELECT
 	YEAR(BQ_Orders.FechaOrden) * 100 + month(BQ_Orders.FechaOrden) AS 'Anio_mes',
@@ -321,6 +311,7 @@ ORDER BY Anio_mes ASC;
 
 
 # --Active Costumers
+# -Hoja: "Mercadeo", Tablas: 5.
 SELECT
 	YEAR(BQ_Orders.FechaOrden) * 100 + month(BQ_Orders.FechaOrden) AS 'Anio_mes',
 	COUNT(DISTINCT(BQ_Orders.Email)) AS 'Active Costumers'
@@ -335,15 +326,16 @@ ORDER BY Anio_mes ASC;
 # Para cálculos por fuente, se deben quitar # dependiendo del análisis.
 SELECT
 	YEAR(BQ_Acquisitions.FechaOrden) * 100 + month(BQ_Acquisitions.FechaOrden) AS 'Anio_mes',
+	BQ_Acquisitions.Source_name AS 'Fuente',
 	COUNT(DISTINCT(BQ_Acquisitions.Orden)) AS 'Adquisiciones'
 FROM
 	BQ_Acquisitions
 WHERE
 	BQ_Acquisitions.TipoOrden = 'Adquisición'
-   #AND BQ_Acquisitions.Source_name = 'Movil App'
-   #AND BQ_Acquisitions.Source_name = 'Movil Web'
    #AND BQ_Acquisitions.Source_name = 'Web'
-GROUP BY Anio_mes
+   #AND BQ_Acquisitions.Source_name = 'Movil Web'
+   AND BQ_Acquisitions.Source_name = 'Movil App'
+GROUP BY Anio_mes, Fuente
 ORDER BY Anio_mes ASC;
 
 
@@ -431,3 +423,28 @@ WHERE
 GROUP BY
 	Anio_Mes;
 	
+
+
+# ---------------------------------------------- SIN USO -----------------------------------------
+# - Estos filtros se realizan en Excel (antes) - Se han generados queries para resumen de información. 
+
+# - Este Query es por si se requiere detalle (Ya no se usa)
+SELECT 
+	YEAR(BQ_ProductsLines.FechaOrden) AS 'Anio',
+    MONTHNAME(BQ_ProductsLines.FechaOrden) AS 'Mes',
+    YEAR(BQ_ProductsLines.FechaOrden) * 100 + MONTH(BQ_ProductsLines.FechaOrden) AS 'Anio_mes',    
+    BQ_ProductsLines.IdOrden,
+    BQ_ProductsLines.StatusID,
+    BQ_ProductsLines.IdProducto,
+    BQ_ProductsLines.TotalCosto_IVA,
+    BQ_ProductsLines.TotalCosto_SinIVA,
+    BQ_ProductsLines.Subtotal_IVA,
+    BQ_ProductsLines.Subtotal_SinIVA,
+    BQ_ProductsLines.IVA,
+	orders_status.name AS 'Status Orden'
+FROM
+	BQ_ProductsLines
+LEFT JOIN orders_status
+	ON (orders_status.id = BQ_ProductsLines.StatusID)
+WHERE
+	BQ_ProductsLines.FechaOrden >= '2018-01-01 00:00:00';

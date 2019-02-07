@@ -4,6 +4,14 @@ CREATE TABLE BQ_RFM (
 	ID int NOT NULL AUTO_INCREMENT,
     userId int,
     Email varchar(50),
+	 Nombre varchar(50),
+	 Apellido varchar(50),
+	 Documento varchar(50),
+	 Teléfono varchar(50),
+	 Dirección varchar(50),
+	 Ciudad varchar(50),
+	 Fecha_nacimiento varchar(50),
+	 Edad int,
     firstOrder date,
     lastOrder date,
     activityPeriod int,
@@ -25,6 +33,39 @@ SELECT
 (@cnt := @cnt + 1) AS ID,
 	users.id AS 'userId',
    BQ_Orders.Email AS 'Email',
+   
+	CASE
+	   WHEN users.billingName IS NULL THEN users.name
+	ELSE users.billingName
+   END AS 'Nombre',
+   
+   CASE
+	   WHEN users.billingSurname IS NULL THEN users.surname
+	ELSE users.billingSurname
+   END AS 'Apellido',
+
+   CASE
+	   WHEN users.billingDoc IS NULL THEN users.doc
+	ELSE users.billingDoc
+   END AS 'Documento',
+
+   CASE
+	   WHEN users.billingTel IS NULL THEN users.tel
+	ELSE users.billingTel
+   END AS 'Teléfono',   
+
+   CASE
+	   WHEN users.billingAddress IS NULL THEN users.address
+	ELSE users.billingAddress
+   END AS 'Dirección',   
+
+   CASE
+	   WHEN users.billingCity IS NULL THEN users.city
+	ELSE users.billingCity
+   END AS 'Ciudad',
+
+   users.birthdate AS 'Fecha_nacimiento',
+   TIMESTAMPDIFF(YEAR, users.birthdate, CURDATE()) AS 'Edad',
    MIN(BQ_Orders.FechaOrden) AS 'firstOrder',
    MAX(BQ_Orders.FechaOrden) AS 'lastOrder',
    (DATEDIFF(MAX(BQ_Orders.FechaOrden), MIN(BQ_Orders.FechaOrden))) + 1 AS 'activityPeriod',
@@ -71,7 +112,8 @@ SELECT
 
 FROM
 	BQ_Orders
-    CROSS JOIN (SELECT @cnt := 0) AS dummy
+CROSS JOIN 
+	(SELECT @cnt := 0) AS dummy
 LEFT JOIN
 	users ON (BQ_Orders.IdUsuario = users.id)
 WHERE

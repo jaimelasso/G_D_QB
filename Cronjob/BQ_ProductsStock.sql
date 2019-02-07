@@ -14,15 +14,15 @@ SELECT
     END AS Vendidos,
     providers.name AS 'Proveedor',
     
-    BQ_Jerarquias.codlinea AS 'IDCategoria',
-    BQ_Jerarquias.desclinea AS 'Categoria',
-    BQ_Jerarquias.codsublinea AS 'IDSubcategoria',
-    BQ_Jerarquias.descsublinea AS 'Subcategoria',
-    BQ_Jerarquias.codclase AS 'IDClase',
-    BQ_Jerarquias.descclase AS 'Clase',
-    BQ_Jerarquias.codsubclase AS 'IDSubclase',
-    BQ_Jerarquias.descsubclase AS 'Subclase',
-    BQ_Jerarquias.linea AS 'Linea'
+    BQ_Hierarchy.codlinea AS 'IDCategoria',
+    BQ_Hierarchy.desclinea AS 'Categoria',
+    BQ_Hierarchy.codsublinea AS 'IDSubcategoria',
+    BQ_Hierarchy.descsublinea AS 'Subcategoria',
+    BQ_Hierarchy.codclase AS 'IDClase',
+    BQ_Hierarchy.descclase AS 'Clase',
+    BQ_Hierarchy.codsubclase AS 'IDSubclase',
+    BQ_Hierarchy.descsubclase AS 'Subclase',
+    BQ_Hierarchy.linea AS 'Linea'
     
 FROM
     campaigns_products
@@ -53,4 +53,4 @@ FROM
         LEFT JOIN
     categories ON (products_categories.categoryId = categories.id)
         LEFT JOIN
-    BQ_Jerarquias ON (categories.code = BQ_Jerarquias.codsubclase);
+    BQ_Hierarchy ON (categories.code = BQ_Hierarchy.codsubclase);

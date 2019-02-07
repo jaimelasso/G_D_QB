@@ -35,15 +35,15 @@ SELECT
         ELSE ROUND((((orders_products.price - products.wholePrice) * orders_products.quantity) / ((products.tax + 100) / 100)),1)
     END AS 'Contribucion_SinIVA',
 
-    BQ_Jerarquias.codlinea AS 'IDCategoria',
-    BQ_Jerarquias.desclinea AS 'Categoria',
-    BQ_Jerarquias.codsublinea AS 'IDSubcategoria',
-    BQ_Jerarquias.descsublinea AS 'Subcategoria',
-    BQ_Jerarquias.codclase AS 'IDClase',
-    BQ_Jerarquias.descclase AS 'Clase',
-    BQ_Jerarquias.codsubclase AS 'IDSubclase',
-    BQ_Jerarquias.descsubclase AS 'Subclase',
-    BQ_Jerarquias.linea AS 'Linea',
+    BQ_Hierarchy.codlinea AS 'IDCategoria',
+    BQ_Hierarchy.desclinea AS 'Categoria',
+    BQ_Hierarchy.codsublinea AS 'IDSubcategoria',
+    BQ_Hierarchy.descsublinea AS 'Subcategoria',
+    BQ_Hierarchy.codclase AS 'IDClase',
+    BQ_Hierarchy.descclase AS 'Clase',
+    BQ_Hierarchy.codsubclase AS 'IDSubclase',
+    BQ_Hierarchy.descsubclase AS 'Subclase',
+    BQ_Hierarchy.linea AS 'Linea',
 
     categories.code AS 'categoriaId',
 	  
@@ -78,7 +78,7 @@ FROM
         LEFT JOIN
     manufacturers ON (products.manufacturerId = manufacturers.id)
         LEFT JOIN
-    BQ_Jerarquias ON (categories.code = BQ_Jerarquias.codsubclase)    
+    BQ_Hierarchy ON (categories.code = BQ_Hierarchy.codsubclase)    
 WHERE
 	orders.created > '2015-11-24 00:00:00' AND
         (orders.statusId = '2'
